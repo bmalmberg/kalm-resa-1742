@@ -12,6 +12,14 @@ En interaktiv karta över Pehr Kalms resa 6 juli – 11 oktober 1742 från Uppsa
 - `data/basemap.json` – förprojicerade SVG-banor för land, sjöar och vattendrag.
 - `build/` – mall och skript. Ändra i `build/template.html` eller i JSON-filerna och kör `python3 build/build.py` för att bygga om `index.html`.
 
+## Delning på Facebook
+
+`og.png` är bilden som visas när länken delas. Facebook kräver en fullständig adress till bilden, så:
+
+1. Öppna `index.html` på GitHub (pennan för att redigera).
+2. Sök efter `ANVANDARNAMN` (finns på två ställen) och byt mot ditt GitHub-användarnamn. Spara.
+3. Klistra in sidans adress i [Facebooks delningsfelsökare](https://developers.facebook.com/tools/debug/) och klicka på *Skrapa igen*, så hämtar Facebook bilden.
+
 ## Om data
 
 - **Koordinaterna** är satta ur minnet av Claude (AI) och inte uppslagna i någon ortnamnsdatabas. Kända orter ligger troligen rätt inom en kilometer eller så; orter med `a: 1` (streckad kant på kartan) är uppskattade utifrån Kalms beskrivningar och kan ligga flera kilometer fel. Rättelser välkomnas.
