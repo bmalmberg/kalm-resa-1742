@@ -1,0 +1,288 @@
+<title>Pehr Kalms resa 1742</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+DW+Pica:ital@0;1&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: kartan fyller ytan, en dagbokspanel till höger (nederst på mobil) visar citatet för vald ort */
+:root{
+  --sea:#d9e3e6; --land:#ecebe2; --land-se:#f3f1e8; --border:#b9b7a8; --lake:#cfdde2;
+  --ink:#22282b; --muted:#5f676a; --panel:#fbfaf6; --line:#d8d6cb;
+  --u:#2f5f8a; --b:#a2382b; --h:#3e7a4f;
+  --display:"IM Fell DW Pica", "Iowan Old Style", Georgia, serif;
+  --ui:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --sea:#17242b; --land:#2a3134; --land-se:#30383b; --border:#4a5458; --lake:#1d2c33;
+  --ink:#e8e6de; --muted:#a3aaa9; --panel:#1f2629; --line:#39434a;
+  --u:#7fb0dc; --b:#e4806f; --h:#86c597; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --sea:#17242b; --land:#2a3134; --land-se:#30383b; --border:#4a5458; --lake:#1d2c33;
+  --ink:#e8e6de; --muted:#a3aaa9; --panel:#1f2629; --line:#39434a;
+  --u:#7fb0dc; --b:#e4806f; --h:#86c597; color-scheme:dark }
+html,body{height:100%}
+body{background:var(--panel);color:var(--ink);font-family:var(--ui);font-size:14px}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 380px;height:100%}
+.mapwrap{position:relative;background:var(--sea);min-width:0;overflow:hidden}
+svg#map{width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+svg#map:active{cursor:grabbing}
+.land{fill:var(--land);stroke:var(--border);stroke-width:.5;vector-effect:non-scaling-stroke}
+.land.se{fill:var(--land-se)}
+.lake{fill:var(--lake);stroke:none}
+.route{fill:none;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round;opacity:.75}
+.route.u{stroke:var(--u)} .route.b{stroke:var(--b)} .route.h{stroke:var(--h);stroke-dasharray:5 4}
+.dot{stroke:var(--panel);stroke-width:1.5;vector-effect:non-scaling-stroke;cursor:pointer}
+.dot.u{fill:var(--u)} .dot.b{fill:var(--b)} .dot.h{fill:var(--h)}
+.dot.approx{stroke-dasharray:2 2}
+.dot:hover,.dot:focus{outline:none;stroke:var(--ink)}
+.dot.sel{stroke:var(--ink);stroke-width:3}
+.lbl{font-family:var(--ui);fill:var(--ink);paint-order:stroke;stroke:var(--land);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.lbl.sel{font-weight:600}
+.dim{opacity:.18}
+.head{position:absolute;left:16px;top:16px;max-width:min(420px,calc(100% - 32px));background:color-mix(in srgb,var(--panel) 88%,transparent);backdrop-filter:blur(4px);border:1px solid var(--line);border-radius:6px;padding:12px 14px;display:grid;gap:8px}
+.head h1{font-family:var(--display);font-weight:400;font-size:1.55rem;line-height:1.1;margin:0;text-wrap:balance}
+.head p{margin:0;color:var(--muted);font-size:.82rem;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:500 .76rem var(--ui);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 10px 4px 8px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chip i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip:focus-visible,.btn:focus-visible,.stop:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.zoom{position:absolute;right:16px;bottom:16px;display:grid;gap:4px;justify-items:end}
+.btn{font:600 1rem var(--ui);width:34px;height:34px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+aside{border-left:1px solid var(--line);display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;background:var(--panel)}
+.card{padding:20px 20px 16px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.eyebrow{font:600 .7rem var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.eyebrow .ph{color:var(--panel);padding:2px 7px;border-radius:3px}
+.card h2{font-family:var(--display);font-weight:400;font-size:1.9rem;line-height:1.05;margin:0;text-wrap:balance}
+.orig{color:var(--muted);font-size:.85rem}
+.orig em{font-family:var(--display);font-size:1.05rem}
+blockquote{margin:0;font-family:var(--display);font-size:1.12rem;line-height:1.45;max-width:65ch}
+blockquote::before{content:"\201D";font-size:2.4rem;line-height:0;vertical-align:-.45em;margin-right:4px;color:var(--muted)}
+.visits{display:grid;gap:14px}
+.visit .dt{font:600 .75rem var(--ui);color:var(--muted);margin-bottom:4px;font-variant-numeric:tabular-nums}
+.nav{display:flex;gap:8px;align-items:center}
+.nav .btn{width:auto;padding:0 12px;font-size:.8rem}
+.nav span{color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums;margin-left:auto}
+.note{font-size:.75rem;color:var(--muted)}
+.list{overflow:auto;padding:8px 0 16px}
+.list h3{font:600 .7rem var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 20px 4px}
+.stop{display:grid;grid-template-columns:74px 1fr;gap:8px;width:100%;text-align:left;border:0;background:none;color:var(--ink);font:inherit;padding:5px 20px;cursor:pointer;align-items:baseline}
+.stop:hover{background:color-mix(in srgb,var(--line) 45%,transparent)}
+.stop.sel{background:color-mix(in srgb,var(--line) 80%,transparent)}
+.stop .d{color:var(--muted);font-size:.78rem;font-variant-numeric:tabular-nums}
+.stop .n{display:flex;gap:7px;align-items:center}
+.stop .n i{width:8px;height:8px;border-radius:50%;flex:none}
+
+.more{justify-self:start;font:500 .78rem var(--ui);color:var(--ink);background:none;border:0;border-bottom:1px solid var(--muted);padding:2px 0;margin-top:6px;cursor:pointer}
+.more:hover{border-bottom-color:var(--ink)}
+.more:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.visit{display:grid}
+dialog#reader{border:1px solid var(--line);border-radius:8px;padding:0;background:var(--panel);color:var(--ink);width:min(760px,calc(100vw - 32px));height:min(86vh,900px);max-width:none;max-height:none}
+dialog#reader[open]{display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+dialog#reader::backdrop{background:rgba(15,20,22,.55)}
+.rd-head{display:flex;gap:12px;align-items:baseline;padding:16px 20px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rd-head h2{font-family:var(--display);font-weight:400;font-size:1.5rem;margin:0}
+.rd-head span{color:var(--muted);font-size:.8rem}
+.rd-head .btn{margin-left:auto}
+.rd-body{overflow:auto;padding:8px 20px 40px;overscroll-behavior:contain}
+.rd-body p{font-family:var(--display);font-size:1.08rem;line-height:1.55;max-width:62ch;margin:0 0 .8em;padding:2px 8px;border-radius:4px}
+.rd-body p.date{font-family:var(--ui);font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:1.4em}
+.rd-body p.hit{background:color-mix(in srgb,var(--b) 16%,transparent);box-shadow:inset 3px 0 0 var(--b)}
+.rd-foot{display:flex;gap:8px;align-items:center;padding:10px 20px;border-top:1px solid var(--line);flex-wrap:wrap}
+.rd-foot .btn{width:auto;padding:0 12px;font-size:.8rem}
+.rd-foot .note{flex:1 1 240px}
+.attr{position:absolute;left:16px;bottom:8px;font-size:.66rem;color:var(--muted)}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;grid-template-rows:56% 44%}
+  aside{border-left:0;border-top:1px solid var(--line);grid-template-rows:auto auto}
+  aside{overflow:auto}
+  .list{overflow:visible}
+  .head{padding:10px 12px}
+  .head h1{font-size:1.25rem}
+  .head p{display:none}
+  .card h2{font-size:1.5rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app">
+  <div class="mapwrap">
+    <svg id="map" role="img" aria-label="Karta över Pehr Kalms resväg 1742 från Uppsala genom Västmanland, Närke och Västergötland till Bohuslän och tillbaka">
+      <g id="vp">
+        <g id="base"></g>
+        <g id="routes"></g>
+        <g id="labels"></g>
+        <g id="dots"></g>
+      </g>
+    </svg>
+    <div class="head">
+      <h1>Pehr Kalms Wästgötha och Bahusländska resa</h1>
+      <p>6 juli – 11 oktober 1742. Klicka på en ort för att läsa vad Kalm skrev där. Dra för att flytta kartan, scrolla eller nyp för att zooma. Orter med streckad kant har ungefärligt läge. Citaten är OCR-text från 1746 års tryck, varsamt rättad. Under varje citat kan du läsa vidare i hela texten.</p>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="zoom">
+      <button class="btn" id="zin" aria-label="Zooma in">+</button>
+      <button class="btn" id="zout" aria-label="Zooma ut">−</button>
+      <button class="btn" id="zbo" title="Zooma till Bohuslän" style="font-size:.68rem;width:auto;padding:0 8px">Bohuslän</button>
+      <button class="btn" id="zall" aria-label="Visa hela resan" title="Hela resan" style="font-size:.85rem">⤢</button>
+    </div>
+    <div class="attr">Kartdata © OpenStreetMap-bidragsgivare · Natural Earth</div>
+  </div>
+  <aside>
+    <div class="card" id="card" aria-live="polite"></div>
+    <div class="list" id="list"></div>
+  </aside>
+</div>
+
+<dialog id="reader" aria-labelledby="rd-title">
+  <div class="rd-head"><h2 id="rd-title"></h2><span id="rd-sub"></span><button class="btn" id="rd-x" aria-label="Stäng">×</button></div>
+  <div class="rd-body" id="rd-body"></div>
+  <div class="rd-foot"><span class="note">Oredigerad OCR-text ur trycket från 1746. Det markerade stycket är citatets källa.</span><button class="btn" id="rd-close">Stäng</button><button class="btn" id="rd-next">Stäng och gå till nästa ort →</button></div>
+</dialog>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+const BASE = __BASE__;
+const DATA = __DATA__;
+const TEXT = __TEXT__;
+const W0=10.6, N0=60.2, COS=Math.cos(58.8*Math.PI/180), K=1000/((18.1-10.6)*COS);
+const proj=(lon,lat)=>[(lon-W0)*COS*K,(N0-lat)*K];
+const PH={u:'Utresan',b:'I Bohuslän',h:'Hemresan'};
+const svg=d3.select('#map').attr('viewBox',`0 0 ${BASE.w} ${BASE.h}`).attr('preserveAspectRatio','xMidYMid slice');
+const base=d3.select('#base');
+base.append('path').attr('class','land').attr('d',BASE.NOR);
+base.append('path').attr('class','land').attr('d',BASE.DNK);
+base.append('path').attr('class','land se').attr('d',BASE.SWE);
+base.append('path').attr('class','lake').attr('d',BASE.lakes+BASE.rivers);
+
+const stops=DATA.stops.map((s,i)=>({...s,i,xy:proj(DATA.places[s.p].lon,DATA.places[s.p].lat)}));
+// route per phase, joined to the next phase's first stop so the line is continuous
+const routes=d3.select('#routes');
+['u','b','h'].forEach(f=>{
+  const idx=stops.filter(s=>s.f===f).map(s=>s.i);
+  const pts=idx.map(i=>stops[i].xy);
+  const nxt=stops[idx[idx.length-1]+1]; if(nxt) pts.push(nxt.xy);
+  routes.append('path').attr('class','route '+f).attr('data-f',f).attr('d','M'+pts.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join('L'));
+});
+// one dot per place, coloured by the phase of its first visit
+const places=Object.entries(DATA.places).map(([id,p])=>{
+  const v=stops.filter(s=>s.p===id); return {id,...p,xy:proj(p.lon,p.lat),visits:v,f:v[0].f,fs:[...new Set(v.map(s=>s.f))]};
+});
+const dots=d3.select('#dots').selectAll('circle').data(places).join('circle')
+  .attr('class',d=>`dot ${d.f}${d.a?' approx':''}`).attr('cx',d=>d.xy[0]).attr('cy',d=>d.xy[1])
+  .attr('tabindex',0).attr('role','button').attr('aria-label',d=>d.n)
+  .on('click',(e,d)=>select(d.visits[0].i,false))
+  .on('keydown',(e,d)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select(d.visits[0].i,false)}});
+dots.append('title').text(d=>d.n);
+const labels=d3.select('#labels').selectAll('text').data(places).join('text').attr('class','lbl')
+  .attr('x',d=>d.xy[0]).attr('y',d=>d.xy[1]).text(d=>d.n.replace(/ (gästgivargård|i Bäve socken|och Tanums prästgård|och Bohus fästning|prästgård|kyrka|vid Kinnekulle)$/,'').replace('Krogarna på ',''));
+
+// filters
+const active=new Set(['u','b','h']);
+const chips=d3.select('#chips');
+['u','b','h'].forEach(f=>{
+  chips.append('button').attr('class','chip').attr('aria-pressed','true').html(`<i style="background:var(--${f})"></i>${PH[f]}`)
+   .on('click',function(){active.has(f)?active.delete(f):active.add(f);if(!active.size)active.add(f);
+     d3.selectAll('.chip').attr('aria-pressed',(_,i)=>active.has('ubh'[i]));applyFilter();});
+});
+function applyFilter(){
+  routes.selectAll('path').classed('dim',function(){return !active.has(this.dataset.f)});
+  dots.classed('dim',d=>!d.fs.some(f=>active.has(f)));
+  labels.classed('dim',d=>!d.fs.some(f=>active.has(f)));
+  d3.selectAll('.stop').classed('dim',function(){return !active.has(this.dataset.f)});
+}
+
+// list
+const list=d3.select('#list');
+['u','b','h'].forEach(f=>{
+  list.append('h3').text(PH[f]);
+  stops.filter(s=>s.f===f).forEach(s=>{
+    list.append('button').attr('class','stop').attr('data-i',s.i).attr('data-f',f)
+      .html(`<span class="d">${s.d}</span><span class="n"><i style="background:var(--${f})"></i>${DATA.places[s.p].n}</span>`)
+      .on('click',()=>select(s.i,true));
+  });
+});
+
+// zoom
+let k=1;
+const zoom=d3.zoom().scaleExtent([1,14]).translateExtent([[-80,-50],[BASE.w+90,BASE.h+90]])
+  .on('zoom',e=>{k=e.transform.k;d3.select('#vp').attr('transform',e.transform);rescale();});
+svg.call(zoom).on('dblclick.zoom',null);
+function rescale(){
+  dots.attr('r',d=>(d.id===cur?7:5)/k);
+  const fs=11/k;
+  labels.attr('font-size',fs).attr('dx',10/k).attr('dy',fs*.35).attr('stroke-width',3/k)
+    .style('display',d=>(k>=3.2||d.id===cur||['uppsala','orebro','lidkoping','stromstad','goteborg','arboga','marstrand','vanersborg','mariestad','enkoping'].includes(d.id))?null:'none');
+}
+function fit(x0,y0,x1,y1,dur=750){
+  const r=svg.node().getBoundingClientRect(); const vb=BASE.w/BASE.h; const sr=r.width/r.height;
+  // viewBox is "slice": compute visible user-space size
+  const visW= sr>vb?BASE.w:BASE.h*sr, visH= sr>vb?BASE.w/sr:BASE.h;
+  const s=Math.min(14,0.85*Math.min(visW/(x1-x0),visH/(y1-y0)));
+  const cx=(x0+x1)/2, cy=(y0+y1)/2;
+  const t=d3.zoomIdentity.translate(BASE.w/2,BASE.h/2).scale(s).translate(-cx,-cy);
+  svg.transition().duration(matchMedia('(prefers-reduced-motion: reduce)').matches?0:dur).call(zoom.transform,t);
+}
+const ext=pl=>{const xs=pl.map(p=>p.xy[0]),ys=pl.map(p=>p.xy[1]);return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]};
+const fitAll=()=>fit(...ext(places));
+const fitBo=()=>fit(...ext(places.filter(p=>p.lon<11.8&&p.lat>57.8)));
+d3.select('#zin').on('click',()=>svg.transition().call(zoom.scaleBy,1.6));
+d3.select('#zout').on('click',()=>svg.transition().call(zoom.scaleBy,1/1.6));
+d3.select('#zall').on('click',fitAll);
+d3.select('#zbo').on('click',fitBo);
+
+// selection
+let cur=null, curI=0;
+const esc=s=>s.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function select(i,pan){
+  curI=i; const s=stops[i]; const p=places.find(q=>q.id===s.p); cur=p.id;
+  dots.classed('sel',d=>d.id===cur); labels.classed('sel',d=>d.id===cur);
+  d3.selectAll('.stop').classed('sel',function(){return +this.dataset.i===i});
+  const others=p.visits.filter(v=>v.i!==i);
+  d3.select('#card').html(`
+    <div class="eyebrow"><span class="ph" style="background:var(--${s.f})">${PH[s.f]}</span><span>${s.d} 1742</span></div>
+    <h2>${esc(p.n)}</h2>
+    <div class="orig">Kalms stavning: <em>${esc(p.o)}</em>${p.a?' · läget är ungefärligt':''}</div>
+    <div class="visits">
+      <div class="visit"><blockquote>${esc(s.q)}</blockquote><button class="more" data-i="${i}">Läs mer i texten</button></div>
+      ${others.map(v=>`<div class="visit"><div class="dt">${v.d} · ${PH[v.f].toLowerCase()}</div><blockquote>${esc(v.q)}</blockquote><button class="more" data-i="${v.i}">Läs mer i texten</button></div>`).join('')}
+    </div>
+    <div class="nav"><button class="btn" id="prev">← Föregående</button><button class="btn" id="next">Nästa →</button><span>${i+1} / ${stops.length}</span></div>`);
+  d3.selectAll('#card .more').on('click',function(){openReader(+this.dataset.i)});
+  d3.select('#prev').attr('disabled',i===0?'':null).on('click',()=>select(Math.max(0,i-1),true));
+  d3.select('#next').attr('disabled',i===stops.length-1?'':null).on('click',()=>select(Math.min(stops.length-1,i+1),true));
+  const li=document.querySelector(`.stop[data-i="${i}"]`), L=document.getElementById('list');
+  if(li && L.scrollHeight>L.clientHeight+2){const top=li.offsetTop-L.offsetTop; if(top<L.scrollTop||top>L.scrollTop+L.clientHeight-40) L.scrollTop=top-L.clientHeight/3;}
+  else document.querySelector('aside').scrollTop=0;
+  rescale();
+  if(pan){const t=d3.zoomTransform(svg.node()); const kk=Math.max(t.k,3.5);
+    svg.transition().duration(matchMedia('(prefers-reduced-motion: reduce)').matches?0:600)
+      .call(zoom.transform,d3.zoomIdentity.translate(BASE.w/2,BASE.h/2).scale(kk).translate(-p.xy[0],-p.xy[1]));}
+}
+document.addEventListener('keydown',e=>{if(dlg.open)return; if(e.target.closest&&e.target.closest('button,[role=button]'))return;
+  if(e.key==='ArrowRight')select(Math.min(stops.length-1,curI+1),true); if(e.key==='ArrowLeft')select(Math.max(0,curI-1),true);});
+
+// reader
+const rdBody=document.getElementById('rd-body'), dlg=document.getElementById('reader');
+let rdBuilt=false, rdStop=0;
+function safe(p){return p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/&lt;(\/?)i&gt;/g,'<$1i>');}
+function buildReader(){
+  if(rdBuilt) return; rdBuilt=true;
+  rdBody.innerHTML=TEXT.map((p,j)=>`<p data-j="${j}"${/^D[\.,]? ?\d{1,2}[\.,]? ?[A-ZÅÄÖ]/.test(p)&&p.length<40?' class="date"':''}>${safe(p)}</p>`).join('');
+}
+function openReader(i){
+  buildReader(); rdStop=i; const s=stops[i], pl=DATA.places[s.p];
+  document.getElementById('rd-title').textContent=pl.n;
+  document.getElementById('rd-sub').textContent=`${s.d} 1742 · Kalms text`;
+  rdBody.querySelectorAll('p.hit').forEach(e=>e.classList.remove('hit'));
+  const el=rdBody.querySelector(`p[data-j="${s.a}"]`); if(el) el.classList.add('hit');
+  document.getElementById('rd-next').disabled = i>=stops.length-1;
+  if(typeof dlg.showModal==='function') dlg.showModal(); else dlg.setAttribute('open','');
+  requestAnimationFrame(()=>{ if(el) rdBody.scrollTop=el.offsetTop-rdBody.offsetTop-rdBody.clientHeight*0.25; });
+}
+function closeReader(){ if(dlg.open) dlg.close(); }
+document.getElementById('rd-x').onclick=closeReader;
+document.getElementById('rd-close').onclick=closeReader;
+document.getElementById('rd-next').onclick=()=>{closeReader(); select(Math.min(stops.length-1,rdStop+1),true);};
+dlg.addEventListener('click',e=>{if(e.target===dlg)closeReader();});
+dlg.addEventListener('close',()=>{const b=document.querySelector(`#card .more[data-i="${rdStop}"]`); if(b) b.focus();});
+fitAll(); setTimeout(()=>{fitAll(); select(0,false);},0);
+</script>
